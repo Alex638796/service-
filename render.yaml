@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: tg-forward-bot
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: OWNER_ID
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: tgforwardbot
+      - key: DEFAULT_DELAY_SECONDS
+        value: "3.0"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
