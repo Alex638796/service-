@@ -7,6 +7,7 @@ from aiogram import Bot
 from models.config_model import BotConfig, BotSettings
 from utils.helpers import save_state, load_state
 from models.config_model import ForwardingState
+from services.keepalive import start_keepalive, stop_keepalive
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,9 @@ async def start_forwarding_task(
     )
     _active_tasks[user_id] = task
     logger.info(f"[user={user_id}] Forwarding task created: {task.get_name()}")
+
+    # Keep Render's free-tier instance awake only while this forwarding job runs.
+    start_keepalive(user_id)
 
 
 async def stop_forwarding_task(user_id: int) -> None:
@@ -125,6 +129,8 @@ async def _run_with_error_handling(
     finally:
         # Clean up task reference
         _active_tasks.pop(user_id, None)
+        # Always stop the keep-alive pinger when forwarding ends, regardless of outcome.
+        await stop_keepalive(user_id)
 
 
 async def _reset_active_state(user_id: int) -> None:
